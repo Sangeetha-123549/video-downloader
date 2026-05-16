@@ -1,13 +1,12 @@
 from flask import Flask, request, jsonify, render_template, send_file
 import yt_dlp
 import os
+import glob
 
 app = Flask(__name__)
 
 DOWNLOAD_DIR = "downloads"
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
-
-latest_file = None
 
 
 @app.route("/")
@@ -18,8 +17,6 @@ def home():
 @app.route("/download", methods=["POST"])
 def download():
 
-    global latest_file
-
     try:
 
         data = request.get_json()
@@ -28,15 +25,12 @@ def download():
 
         ydl_opts = {
             "format": "best",
-            "outtmpl": f"{DOWNLOAD_DIR}/%(title)s.%(ext)s",
+            "outtmpl": f"{DOWNLOAD_DIR}/video.%(ext)s",
             "noplaylist": True
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-
-            info = ydl.extract_info(url, download=True)
-
-            latest_file = ydl.prepare_filename(info)
+            ydl.download([url])
 
         return jsonify({
             "status": "success"
@@ -53,20 +47,17 @@ def download():
 @app.route("/file")
 def file():
 
-    global latest_file
+    files = glob.glob(f"{DOWNLOAD_DIR}/video.*")
 
-    try:
+    if not files:
+        return "Video not found"
 
-        return send_file(
-            latest_file,
-            as_attachment=True,
-            download_name="video.mp4",
-            mimetype="video/mp4"
-        )
-
-    except Exception as e:
-
-        return str(e)
+    return send_file(
+        files[0],
+        as_attachment=True,
+        download_name="video.mp4",
+        mimetype="video/mp4"
+    )
 
 
 if __name__ == "__main__":
