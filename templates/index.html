@@ -1,172 +1,91 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Video Downloader</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video Saver</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 body{
-    margin:0;
-    font-family:Arial;
-    background: radial-gradient(circle at top,#111827,#0f172a);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    color:white;
+  font-family:Arial;
+  background:#0f172a;
+  color:white;
+  text-align:center;
+  padding:20px;
 }
-
-.card{
-    width:90%;
-    max-width:420px;
-    background:#111827;
-    padding:25px;
-    border-radius:20px;
-    box-shadow:0 10px 40px rgba(0,0,0,0.6);
-    text-align:center;
-    animation:fade 0.6s ease-in-out;
-}
-
-@keyframes fade{
-    from{opacity:0; transform:translateY(20px);}
-    to{opacity:1; transform:translateY(0);}
-}
-
-h2{
-    margin-bottom:15px;
-}
-
 input{
-    width:100%;
-    padding:12px;
-    border-radius:10px;
-    border:none;
-    outline:none;
-    margin-bottom:10px;
+  width:90%;
+  padding:10px;
+  border-radius:10px;
+  border:none;
 }
-
 button{
-    width:100%;
-    padding:12px;
-    border:none;
-    border-radius:10px;
-    background:linear-gradient(90deg,#22c55e,#16a34a);
-    color:white;
-    font-size:16px;
-    cursor:pointer;
-    transition:0.3s;
+  margin-top:10px;
+  padding:10px;
+  width:90%;
+  background:green;
+  color:white;
+  border:none;
+  border-radius:10px;
 }
-
-button:hover{
-    transform:scale(1.03);
+#msg{
+  margin-top:20px;
 }
-
-.loader{
-    border:4px solid #333;
-    border-top:4px solid #22c55e;
-    border-radius:50%;
-    width:30px;
-    height:30px;
-    margin:15px auto;
-    display:none;
-    animation:spin 1s linear infinite;
-}
-
-@keyframes spin{
-    100%{transform:rotate(360deg);}
-}
-
-.progress{
-    width:100%;
-    background:#374151;
-    border-radius:10px;
-    margin-top:10px;
-    overflow:hidden;
-    display:none;
-}
-
 .bar{
-    height:10px;
-    width:0%;
-    background:#22c55e;
-    transition:0.3s;
+  width:90%;
+  background:#333;
+  margin:20px auto;
+  border-radius:10px;
 }
-
-.status{
-    margin-top:10px;
-    font-size:14px;
-}
-
-.tick{
-    display:none;
-    font-size:20px;
-    color:#22c55e;
-    margin-top:10px;
-}
-
-video{
-    width:100%;
-    margin-top:15px;
-    border-radius:10px;
-    display:none;
+.fill{
+  height:10px;
+  width:0%;
+  background:lime;
 }
 </style>
 </head>
 
 <body>
 
-<div class="card">
-    <h2>🎬 Video Downloader</h2>
+<h2>📥 YouTube Video Saver</h2>
 
-    <input id="url" placeholder="Paste video URL">
+<input id="url" placeholder="Paste YouTube link">
+<br>
 
-    <button onclick="start()">Download</button>
+<button onclick="startDownload()">Download</button>
 
-    <div class="loader" id="loader"></div>
-
-    <div class="progress" id="progressBox">
-        <div class="bar" id="bar"></div>
-    </div>
-
-    <div class="status" id="status">Ready</div>
-
-    <div class="tick" id="tick">Download Completed ✅</div>
-
-    <video id="video" controls></video>
+<div class="bar">
+  <div class="fill" id="fill"></div>
 </div>
 
+<div id="msg">Waiting...</div>
+
 <script>
-function start(){
-    let loader=document.getElementById("loader");
-    let bar=document.getElementById("bar");
-    let progressBox=document.getElementById("progressBox");
-    let status=document.getElementById("status");
-    let tick=document.getElementById("tick");
-    let video=document.getElementById("video");
+function startDownload(){
 
-    loader.style.display="block";
-    progressBox.style.display="block";
-    tick.style.display="none";
-    bar.style.width="0%";
+let fill=document.getElementById("fill");
+let msg=document.getElementById("msg");
 
-    let p=0;
+fetch("/download",{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({url:document.getElementById("url").value})
+});
 
-    let interval=setInterval(()=>{
-        p+=10;
-        bar.style.width=p+"%";
-        status.innerText="Downloading... "+p+"%";
+let p=0;
 
-        if(p>=100){
-            clearInterval(interval);
-            loader.style.display="none";
-            tick.style.display="block";
-            status.innerText="Success";
+let t=setInterval(async()=>{
+  let res=await fetch("/progress");
+  let data=await res.json();
 
-            video.src="https://www.w3schools.com/html/mov_bbb.mp4";
-            video.style.display="block";
-        }
-    },400);
+  p=data.value;
+  fill.style.width=p+"%";
+  msg.innerHTML="Downloading... "+p+"%";
+
+  if(p>=100){
+    clearInterval(t);
+    msg.innerHTML="✅ Download Completed! Check Downloads Folder / Server Storage";
+  }
+},500);
 }
 </script>
 
