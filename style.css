@@ -1,161 +1,28 @@
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, sans-serif;
+body {
+    font-family: Arial;
+    text-align: center;
+    background: #f2f2f2;
 }
 
-body{
-    background:linear-gradient(135deg,#0f172a,#1e293b);
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    overflow-x:hidden;
+.container {
+    margin-top: 100px;
 }
 
-/* APP */
-.app{
-    width:100%;
-    display:flex;
-    justify-content:center;
-    padding:20px;
+input {
+    width: 300px;
+    padding: 10px;
 }
 
-/* CARD */
-.card{
-    width:100%;
-    max-width:420px;
-    background:#111827;
-    padding:25px;
-    border-radius:18px;
-    text-align:center;
-    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    cursor: pointer;
 }
 
-/* TEXT */
-h1{
-    color:#fff;
-    font-size:26px;
-    margin-bottom:8px;
-}
-
-.subtitle{
-    color:#9ca3af;
-    font-size:14px;
-    margin-bottom:20px;
-}
-
-/* INPUT */
-input{
-    width:100%;
-    padding:12px;
-    border:none;
-    border-radius:10px;
-    margin-bottom:15px;
-    font-size:15px;
-    outline:none;
-}
-
-/* BUTTON */
-button{
-    width:100%;
-    padding:12px;
-    border:none;
-    border-radius:10px;
-    background:#3b82f6;
-    color:white;
-    font-size:15px;
-    cursor:pointer;
-    margin-bottom:10px;
-    transition:0.2s;
-}
-
-button:hover{
-    background:#2563eb;
-    transform:scale(1.02);
-}
-
-button:disabled{
-    opacity:0.6;
-}
-
-/* INSTALL BUTTON */
-.install-btn{
-    background:#22c55e;
-}
-
-.install-btn:hover{
-    background:#16a34a;
-}
-
-/* THUMBNAIL */
-.thumbnail-box{
-    width:100%;
-    margin:15px 0;
-    display:none;
-    border-radius:12px;
-    overflow:hidden;
-    box-shadow:0 5px 15px rgba(0,0,0,0.3);
-}
-
-.thumbnail-box img{
-    width:100%;
-    display:block;
-}
-
-/* SPINNER */
-.spinner{
-    width:40px;
-    height:40px;
-    border:4px solid #374151;
-    border-top:4px solid #3b82f6;
-    border-radius:50%;
-    margin:15px auto;
-    animation:spin 1s linear infinite;
-    display:none;
-}
-
-@keyframes spin{
-    0%{transform:rotate(0deg);}
-    100%{transform:rotate(360deg);}
-}
-
-/* PROGRESS */
-.progress-container{
-    width:100%;
-    height:10px;
-    background:#374151;
-    border-radius:50px;
-    overflow:hidden;
-}
-
-.progress-bar{
-    width:0%;
-    height:100%;
-    background:#22c55e;
-    transition:0.2s;
-}
-
-/* MESSAGE */
-#message{
-    margin-top:10px;
-    font-size:14px;
-    color:#d1d5db;
-}
-
-/* MOBILE */
-@media(max-width:600px){
-    .card{
-        width:95%;
-        padding:18px;
-    }
-
-    h1{
-        font-size:22px;
-    }
-
-    input, button{
-        font-size:14px;
-    }
+#progressBar {
+    width: 0%;
+    height: 20px;
+    background: green;
+    margin-top: 20px;
+    transition: 0.3s;
 }

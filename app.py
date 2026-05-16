@@ -1,43 +1,27 @@
 from flask import Flask, render_template, request, jsonify
-from flask_socketio import SocketIO
 import time
-import threading
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")
+
+progress = {"value": 0}
 
 @app.route("/")
 def home():
     return render_template("index.html")
 
-
 @app.route("/download", methods=["POST"])
 def download():
+    progress["value"] = 0
 
-    data = request.json
-    url = data.get("url")
+    for i in range(1, 101):
+        time.sleep(0.03)
+        progress["value"] = i
 
-    def run_progress():
+    return jsonify({"status": "completed"})
 
-        # 🔥 REAL progress loop
-        for i in range(1, 101):
-
-            time.sleep(0.05)  # simulate speed
-
-            socketio.emit("progress_update", {
-                "progress": i
-            })
-
-        # 🔥 FINAL COMPLETE EVENT
-        socketio.emit("download_complete", {
-            "status": "success"
-        })
-
-    thread = threading.Thread(target=run_progress)
-    thread.start()
-
-    return jsonify({"status": "started"})
-
+@app.route("/progress")
+def get_progress():
+    return jsonify(progress)
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=10000)
+    app.run(host="0.0.0.0", port=10000)

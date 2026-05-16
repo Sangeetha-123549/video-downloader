@@ -1,7 +1,9 @@
 {
   "name": "Video Downloader",
   "short_name": "Downloader",
+  "description": "Flask based video downloader web app",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#3b82f6",

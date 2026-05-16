@@ -1,62 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Downloader App</title>
-
-    <!-- PWA -->
-    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-    <meta name="theme-color" content="#3b82f6">
-
-    <!-- CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Video Downloader</title>
 </head>
-
 <body>
 
-<div class="app">
+<h2>Video Downloader</h2>
 
-    <div class="card">
+<input id="url" placeholder="Enter URL">
+<button onclick="download()">Download</button>
 
-        <h1>⚡ Video Downloader</h1>
-        <p class="subtitle">Paste link, preview & download 📱</p>
+<p id="msg"></p>
+<div id="bar"></div>
 
-        <!-- URL INPUT -->
-        <input type="text" id="videoUrl" placeholder="Paste YouTube URL here">
+<script>
+async function download() {
 
-        <!-- THUMBNAIL -->
-        <div class="thumbnail-box" id="thumbnailBox">
-            <img id="thumbnail" src="" alt="thumbnail">
-        </div>
+    document.getElementById("msg").innerText = "Starting...";
 
-        <!-- BUTTONS -->
-        <button id="downloadBtn">Download</button>
+    await fetch("/download", {
+        method: "POST"
+    });
 
-        <button id="installBtn" class="install-btn" style="display:none;">
-            Install App 📱
-        </button>
+    let interval = setInterval(async () => {
 
-        <!-- SPINNER -->
-        <div class="spinner" id="spinner"></div>
+        let res = await fetch("/progress");
+        let data = await res.json();
 
-        <!-- PROGRESS -->
-        <div class="progress-container">
-            <div class="progress-bar" id="progressBar"></div>
-        </div>
+        document.getElementById("msg").innerText =
+            "Progress: " + data.value + "%";
 
-        <!-- MESSAGE -->
-        <p id="message"></p>
+        if (data.value >= 100) {
+            clearInterval(interval);
+            document.getElementById("msg").innerText =
+                "Download Complete ✅";
+        }
 
-    </div>
-
-</div>
-
-<!-- SOCKET.IO -->
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-
-<!-- SCRIPT -->
-<script src="{{ url_for('static', filename='script.js') }}"></script>
+    }, 300);
+}
+</script>
 
 </body>
 </html>
