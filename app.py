@@ -23,6 +23,7 @@ def download():
     try:
 
         data = request.get_json()
+
         url = data["url"]
 
         ydl_opts = {
@@ -54,14 +55,16 @@ def file():
 
     global latest_file
 
-    if latest_file and os.path.exists(latest_file):
+    try:
 
         return send_file(
             latest_file,
             as_attachment=True
         )
 
-    return "File not found"
+    except Exception as e:
+
+        return str(e)
 
 
 if __name__ == "__main__":
