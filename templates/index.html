@@ -120,11 +120,11 @@ async function downloadVideo(){
     }
 
     spinner.style.display="block";
-    status.innerText="Downloading video...";
+    status.innerText="Downloading video... Please wait";
 
     try{
 
-        await fetch("/download",{
+        let response = await fetch("/download",{
             method:"POST",
             headers:{
                 "Content-Type":"application/json"
@@ -134,9 +134,13 @@ async function downloadVideo(){
             })
         });
 
+        let data = await response.json();
+
         status.innerText="✅ Download completed";
 
-        window.location.href="/file";
+        setTimeout(() => {
+            window.location.href="/file";
+        }, 5000);
 
     }
 
