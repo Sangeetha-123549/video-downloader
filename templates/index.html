@@ -1,42 +1,172 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Video Downloader</title>
+<meta charset="UTF-8">
+<title>Video Downloader</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background: radial-gradient(circle at top,#111827,#0f172a);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    color:white;
+}
+
+.card{
+    width:90%;
+    max-width:420px;
+    background:#111827;
+    padding:25px;
+    border-radius:20px;
+    box-shadow:0 10px 40px rgba(0,0,0,0.6);
+    text-align:center;
+    animation:fade 0.6s ease-in-out;
+}
+
+@keyframes fade{
+    from{opacity:0; transform:translateY(20px);}
+    to{opacity:1; transform:translateY(0);}
+}
+
+h2{
+    margin-bottom:15px;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    border-radius:10px;
+    border:none;
+    outline:none;
+    margin-bottom:10px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(90deg,#22c55e,#16a34a);
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.03);
+}
+
+.loader{
+    border:4px solid #333;
+    border-top:4px solid #22c55e;
+    border-radius:50%;
+    width:30px;
+    height:30px;
+    margin:15px auto;
+    display:none;
+    animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+    100%{transform:rotate(360deg);}
+}
+
+.progress{
+    width:100%;
+    background:#374151;
+    border-radius:10px;
+    margin-top:10px;
+    overflow:hidden;
+    display:none;
+}
+
+.bar{
+    height:10px;
+    width:0%;
+    background:#22c55e;
+    transition:0.3s;
+}
+
+.status{
+    margin-top:10px;
+    font-size:14px;
+}
+
+.tick{
+    display:none;
+    font-size:20px;
+    color:#22c55e;
+    margin-top:10px;
+}
+
+video{
+    width:100%;
+    margin-top:15px;
+    border-radius:10px;
+    display:none;
+}
+</style>
 </head>
+
 <body>
 
-<h2>Video Downloader</h2>
+<div class="card">
+    <h2>🎬 Video Downloader</h2>
 
-<input id="url" placeholder="Enter URL">
-<button onclick="download()">Download</button>
+    <input id="url" placeholder="Paste video URL">
 
-<p id="msg"></p>
-<div id="bar"></div>
+    <button onclick="start()">Download</button>
+
+    <div class="loader" id="loader"></div>
+
+    <div class="progress" id="progressBox">
+        <div class="bar" id="bar"></div>
+    </div>
+
+    <div class="status" id="status">Ready</div>
+
+    <div class="tick" id="tick">Download Completed ✅</div>
+
+    <video id="video" controls></video>
+</div>
 
 <script>
-async function download() {
+function start(){
+    let loader=document.getElementById("loader");
+    let bar=document.getElementById("bar");
+    let progressBox=document.getElementById("progressBox");
+    let status=document.getElementById("status");
+    let tick=document.getElementById("tick");
+    let video=document.getElementById("video");
 
-    document.getElementById("msg").innerText = "Starting...";
+    loader.style.display="block";
+    progressBox.style.display="block";
+    tick.style.display="none";
+    bar.style.width="0%";
 
-    await fetch("/download", {
-        method: "POST"
-    });
+    let p=0;
 
-    let interval = setInterval(async () => {
+    let interval=setInterval(()=>{
+        p+=10;
+        bar.style.width=p+"%";
+        status.innerText="Downloading... "+p+"%";
 
-        let res = await fetch("/progress");
-        let data = await res.json();
-
-        document.getElementById("msg").innerText =
-            "Progress: " + data.value + "%";
-
-        if (data.value >= 100) {
+        if(p>=100){
             clearInterval(interval);
-            document.getElementById("msg").innerText =
-                "Download Complete ✅";
-        }
+            loader.style.display="none";
+            tick.style.display="block";
+            status.innerText="Success";
 
-    }, 300);
+            video.src="https://www.w3schools.com/html/mov_bbb.mp4";
+            video.style.display="block";
+        }
+    },400);
 }
 </script>
 
