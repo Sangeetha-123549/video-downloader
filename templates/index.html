@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Video Downloader</title>
+</head>
+<body>
+
+<h2>Video Downloader</h2>
+
+<input id="url" placeholder="Enter URL">
+<button onclick="download()">Download</button>
+
+<p id="msg"></p>
+<div id="bar"></div>
+
+<script>
+async function download() {
+
+    document.getElementById("msg").innerText = "Starting...";
+
+    await fetch("/download", {
+        method: "POST"
+    });
+
+    let interval = setInterval(async () => {
+
+        let res = await fetch("/progress");
+        let data = await res.json();
+
+        document.getElementById("msg").innerText =
+            "Progress: " + data.value + "%";
+
+        if (data.value >= 100) {
+            clearInterval(interval);
+            document.getElementById("msg").innerText =
+                "Download Complete ✅";
+        }
+
+    }, 300);
+}
+</script>
+
+</body>
+</html>
