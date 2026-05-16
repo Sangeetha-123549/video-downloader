@@ -1,9 +1,13 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, render_template, jsonify, send_file
+import yt_dlp
+import os
 
 app = Flask(__name__)
 
-progress = 0
-video_url = ""
+DOWNLOAD_FOLDER = "downloads"
+os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
+
+downloaded_file = ""
 
 @app.route("/")
 def home():
@@ -11,21 +15,25 @@ def home():
 
 @app.route("/download", methods=["POST"])
 def download():
-    global progress, video_url
-    data = request.get_json()
-    video_url = data["url"]
+    global downloaded_file
 
-    progress = 0
-    return jsonify({"status":"started"})
+    url = request.json["url"]
 
-@app.route("/progress")
-def get_progress():
-    global progress
+    ydl_opts = {
+        "outtmpl": f"{DOWNLOAD_FOLDER}/%(title)s.%(ext)s",
+        "format": "best"
+    }
 
-    if progress < 100:
-        progress += 20
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(url, download=True)
+        filename = ydl.prepare_filename(info)
+        downloaded_file = filename
 
-    return jsonify({"value": progress})
+    return jsonify({"status": "done"})
+
+@app.route("/file")
+def file():
+    return send_file(downloaded_file, as_attachment=True)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
