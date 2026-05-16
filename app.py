@@ -17,33 +17,56 @@ def home():
 
 @app.route("/download", methods=["POST"])
 def download():
+
     global latest_file
 
-    data = request.get_json()
-    url = data["url"]
+    try:
 
-    ydl_opts = {
-        "format": "best[ext=mp4]",
-        "outtmpl": f"{DOWNLOAD_DIR}/%(title)s.%(ext)s",
-        "noplaylist": True
-    }
+        data = request.get_json()
+        url = data["url"]
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=True)
-        latest_file = ydl.prepare_filename(info)
+        ydl_opts = {
+            "format": "best",
+            "outtmpl": f"{DOWNLOAD_DIR}/%(title)s.%(ext)s",
+            "noplaylist": True
+        }
 
-    return jsonify({"status": "done"})
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+
+            info = ydl.extract_info(url, download=True)
+
+            latest_file = ydl.prepare_filename(info)
+
+        return jsonify({
+            "status": "success"
+        })
+
+    except Exception as e:
+
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        })
 
 
 @app.route("/file")
 def file():
+
     global latest_file
 
     if latest_file and os.path.exists(latest_file):
-        return send_file(latest_file, as_attachment=True)
+
+        return send_file(
+            latest_file,
+            as_attachment=True
+        )
 
     return "File not found"
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+
+    app.run(
+        host="0.0.0.0",
+        port=10000
+    )
