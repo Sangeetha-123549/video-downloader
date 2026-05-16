@@ -1,39 +1,49 @@
-from flask import Flask, request, render_template, jsonify, send_file
+from flask import Flask, request, jsonify, render_template, send_file
 import yt_dlp
 import os
 
 app = Flask(__name__)
 
-DOWNLOAD_FOLDER = "downloads"
-os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
+DOWNLOAD_DIR = "downloads"
+os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
-downloaded_file = ""
+latest_file = None
+
 
 @app.route("/")
 def home():
     return render_template("index.html")
 
+
 @app.route("/download", methods=["POST"])
 def download():
-    global downloaded_file
+    global latest_file
 
-    url = request.json["url"]
+    data = request.get_json()
+    url = data["url"]
 
     ydl_opts = {
-        "outtmpl": f"{DOWNLOAD_FOLDER}/%(title)s.%(ext)s",
-        "format": "best"
+        "format": "best[ext=mp4]",
+        "outtmpl": f"{DOWNLOAD_DIR}/%(title)s.%(ext)s",
+        "noplaylist": True
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
-        filename = ydl.prepare_filename(info)
-        downloaded_file = filename
+        latest_file = ydl.prepare_filename(info)
 
     return jsonify({"status": "done"})
 
+
 @app.route("/file")
 def file():
-    return send_file(downloaded_file, as_attachment=True)
+    global latest_file
+
+    if latest_file and os.path.exists(latest_file):
+        return send_file(latest_file, as_attachment=True)
+
+    return "File not found"
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
