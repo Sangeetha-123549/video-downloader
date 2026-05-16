@@ -2,101 +2,81 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Video Downloader</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video Downloader</title>
 
 <style>
-body {
-    margin: 0;
-    font-family: Arial;
-    background: linear-gradient(135deg,#0f172a,#1e293b);
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+
+body{
+    margin:0;
+    padding:0;
+    font-family:Arial,sans-serif;
+    background:linear-gradient(135deg,#0f172a,#1e293b);
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:white;
 }
 
-.container {
-    width: 90%;
-    max-width: 400px;
-    background: #111827;
-    padding: 20px;
-    border-radius: 15px;
-    text-align: center;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+.container{
+    width:90%;
+    max-width:400px;
+    background:#111827;
+    padding:25px;
+    border-radius:20px;
+    text-align:center;
+    box-shadow:0 0 25px rgba(0,0,0,0.5);
 }
 
-input {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: none;
-    margin-bottom: 10px;
+h1{
+    margin-bottom:20px;
 }
 
-button {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    background: #22c55e;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
+input{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    margin-bottom:15px;
+    outline:none;
 }
 
-button:hover {
-    background: #16a34a;
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:#22c55e;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
 }
 
-.spinner {
-    display: none;
-    margin: 15px auto;
-    border: 4px solid #333;
-    border-top: 4px solid #22c55e;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    animation: spin 1s linear infinite;
+button:hover{
+    background:#16a34a;
 }
 
-@keyframes spin {
-    100% { transform: rotate(360deg); }
+#status{
+    margin-top:15px;
+    font-size:14px;
 }
 
-.progress-container {
-    width: 100%;
-    background: #374151;
-    border-radius: 10px;
-    margin-top: 10px;
-    display: none;
+.spinner{
+    margin:15px auto;
+    width:35px;
+    height:35px;
+    border:4px solid #333;
+    border-top:4px solid #22c55e;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+    display:none;
 }
 
-.progress-bar {
-    height: 10px;
-    width: 0%;
-    background: #22c55e;
-    border-radius: 10px;
-}
-
-.status {
-    margin-top: 10px;
-    font-size: 14px;
-}
-
-.success {
-    display: none;
-    margin-top: 15px;
-    color: #22c55e;
-    font-size: 18px;
-}
-
-a.download-link {
-    display: none;
-    margin-top: 15px;
-    color: #60a5fa;
-    text-decoration: underline;
+@keyframes spin{
+    100%{
+        transform:rotate(360deg);
+    }
 }
 
 </style>
@@ -105,79 +85,71 @@ a.download-link {
 <body>
 
 <div class="container">
-    <h2>🎬 Video Downloader</h2>
 
-    <input type="text" id="url" placeholder="Paste YouTube URL here">
+    <h1>🎬 Video Downloader</h1>
 
-    <button onclick="startDownload()">Download</button>
+    <input
+        type="text"
+        id="url"
+        placeholder="Paste YouTube URL">
+
+    <button onclick="downloadVideo()">
+        Download
+    </button>
 
     <div class="spinner" id="spinner"></div>
 
-    <div class="progress-container" id="progressBox">
-        <div class="progress-bar" id="bar"></div>
+    <div id="status">
+        Ready
     </div>
-
-    <div class="status" id="status">Ready</div>
-
-    <div class="success" id="success">✅ Download Completed!</div>
-
-    <!-- REAL DOWNLOAD LINK -->
-    <a href="/file" class="download-link" id="downloadLink">
-        📥 Click here to download video
-    </a>
 
 </div>
 
 <script>
-function startDownload() {
 
-    let url = document.getElementById("url").value;
+async function downloadVideo(){
 
-    let spinner = document.getElementById("spinner");
-    let bar = document.getElementById("bar");
-    let progressBox = document.getElementById("progressBox");
-    let status = document.getElementById("status");
-    let success = document.getElementById("success");
-    let downloadLink = document.getElementById("downloadLink");
+    let url=document.getElementById("url").value;
 
-    spinner.style.display = "block";
-    progressBox.style.display = "block";
-    success.style.display = "none";
-    downloadLink.style.display = "none";
-    bar.style.width = "0%";
-    status.innerText = "Starting...";
+    let spinner=document.getElementById("spinner");
+    let status=document.getElementById("status");
 
-    // call backend
-    fetch("/download", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({url: url})
-    });
+    if(url===""){
+        alert("Paste YouTube URL");
+        return;
+    }
 
-    let progress = 0;
+    spinner.style.display="block";
+    status.innerText="Downloading video...";
 
-    let interval = setInterval(async () => {
+    try{
 
-        let res = await fetch("/progress");
-        let data = await res.json();
+        await fetch("/download",{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                url:url
+            })
+        });
 
-        progress = data.value;
-        bar.style.width = progress + "%";
-        status.innerText = "Downloading... " + progress + "%";
+        status.innerText="✅ Download completed";
 
-        if(progress >= 100) {
-            clearInterval(interval);
+        window.location.href="/file";
 
-            spinner.style.display = "none";
-            success.style.display = "block";
-            status.innerText = "Done";
+    }
 
-            // REAL DOWNLOAD LINK SHOW
-            downloadLink.style.display = "block";
-        }
+    catch(error){
 
-    }, 500);
+        status.innerText="❌ Download failed";
+
+    }
+
+    spinner.style.display="none";
+
 }
+
 </script>
 
 </body>
