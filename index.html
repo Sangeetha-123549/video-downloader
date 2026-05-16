@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Downloader App</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#3b82f6">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="app">
+
+    <div class="card">
+
+        <h1>⚡ Video Downloader</h1>
+        <p class="subtitle">Paste link, preview & download 📱</p>
+
+        <!-- URL INPUT -->
+        <input type="text" id="videoUrl" placeholder="Paste YouTube URL here">
+
+        <!-- THUMBNAIL -->
+        <div class="thumbnail-box" id="thumbnailBox">
+            <img id="thumbnail" src="" alt="thumbnail">
+        </div>
+
+        <!-- BUTTONS -->
+        <button id="downloadBtn">Download</button>
+
+        <button id="installBtn" class="install-btn" style="display:none;">
+            Install App 📱
+        </button>
+
+        <!-- SPINNER -->
+        <div class="spinner" id="spinner"></div>
+
+        <!-- PROGRESS -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <!-- MESSAGE -->
+        <p id="message"></p>
+
+    </div>
+
+</div>
+
+<!-- SOCKET.IO -->
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+<!-- SCRIPT -->
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>

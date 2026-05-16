@@ -1,0 +1,4 @@
+Flask
+Flask-socketio
+Eventlet
+yt-dlp
