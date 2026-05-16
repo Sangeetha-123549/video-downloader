@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request, jsonify
-import time
 
 app = Flask(__name__)
 
-progress = {"value": 0}
+progress = 0
+video_url = ""
 
 @app.route("/")
 def home():
@@ -11,17 +11,21 @@ def home():
 
 @app.route("/download", methods=["POST"])
 def download():
-    progress["value"] = 0
+    global progress, video_url
+    data = request.get_json()
+    video_url = data["url"]
 
-    for i in range(1, 101):
-        time.sleep(0.03)
-        progress["value"] = i
-
-    return jsonify({"status": "completed"})
+    progress = 0
+    return jsonify({"status":"started"})
 
 @app.route("/progress")
 def get_progress():
-    return jsonify(progress)
+    global progress
+
+    if progress < 100:
+        progress += 20
+
+    return jsonify({"value": progress})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
