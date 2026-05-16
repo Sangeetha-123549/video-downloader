@@ -59,7 +59,9 @@ def file():
 
         return send_file(
             latest_file,
-            as_attachment=True
+            as_attachment=True,
+            download_name="video.mp4",
+            mimetype="video/mp4"
         )
 
     except Exception as e:
