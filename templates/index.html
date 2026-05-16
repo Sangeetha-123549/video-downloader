@@ -1,91 +1,182 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Video Saver</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Video Downloader</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{
-  font-family:Arial;
-  background:#0f172a;
-  color:white;
-  text-align:center;
-  padding:20px;
+body {
+    margin: 0;
+    font-family: Arial;
+    background: linear-gradient(135deg,#0f172a,#1e293b);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
-input{
-  width:90%;
-  padding:10px;
-  border-radius:10px;
-  border:none;
+
+.container {
+    width: 90%;
+    max-width: 400px;
+    background: #111827;
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
-button{
-  margin-top:10px;
-  padding:10px;
-  width:90%;
-  background:green;
-  color:white;
-  border:none;
-  border-radius:10px;
+
+input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    margin-bottom: 10px;
 }
-#msg{
-  margin-top:20px;
+
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #22c55e;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
 }
-.bar{
-  width:90%;
-  background:#333;
-  margin:20px auto;
-  border-radius:10px;
+
+button:hover {
+    background: #16a34a;
 }
-.fill{
-  height:10px;
-  width:0%;
-  background:lime;
+
+.spinner {
+    display: none;
+    margin: 15px auto;
+    border: 4px solid #333;
+    border-top: 4px solid #22c55e;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
 }
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+.progress-container {
+    width: 100%;
+    background: #374151;
+    border-radius: 10px;
+    margin-top: 10px;
+    display: none;
+}
+
+.progress-bar {
+    height: 10px;
+    width: 0%;
+    background: #22c55e;
+    border-radius: 10px;
+}
+
+.status {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.success {
+    display: none;
+    margin-top: 15px;
+    color: #22c55e;
+    font-size: 18px;
+}
+
+a.download-link {
+    display: none;
+    margin-top: 15px;
+    color: #60a5fa;
+    text-decoration: underline;
+}
+
 </style>
 </head>
 
 <body>
 
-<h2>📥 YouTube Video Saver</h2>
+<div class="container">
+    <h2>🎬 Video Downloader</h2>
 
-<input id="url" placeholder="Paste YouTube link">
-<br>
+    <input type="text" id="url" placeholder="Paste YouTube URL here">
 
-<button onclick="startDownload()">Download</button>
+    <button onclick="startDownload()">Download</button>
 
-<div class="bar">
-  <div class="fill" id="fill"></div>
+    <div class="spinner" id="spinner"></div>
+
+    <div class="progress-container" id="progressBox">
+        <div class="progress-bar" id="bar"></div>
+    </div>
+
+    <div class="status" id="status">Ready</div>
+
+    <div class="success" id="success">✅ Download Completed!</div>
+
+    <!-- REAL DOWNLOAD LINK -->
+    <a href="/file" class="download-link" id="downloadLink">
+        📥 Click here to download video
+    </a>
+
 </div>
 
-<div id="msg">Waiting...</div>
-
 <script>
-function startDownload(){
+function startDownload() {
 
-let fill=document.getElementById("fill");
-let msg=document.getElementById("msg");
+    let url = document.getElementById("url").value;
 
-fetch("/download",{
-  method:"POST",
-  headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({url:document.getElementById("url").value})
-});
+    let spinner = document.getElementById("spinner");
+    let bar = document.getElementById("bar");
+    let progressBox = document.getElementById("progressBox");
+    let status = document.getElementById("status");
+    let success = document.getElementById("success");
+    let downloadLink = document.getElementById("downloadLink");
 
-let p=0;
+    spinner.style.display = "block";
+    progressBox.style.display = "block";
+    success.style.display = "none";
+    downloadLink.style.display = "none";
+    bar.style.width = "0%";
+    status.innerText = "Starting...";
 
-let t=setInterval(async()=>{
-  let res=await fetch("/progress");
-  let data=await res.json();
+    // call backend
+    fetch("/download", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({url: url})
+    });
 
-  p=data.value;
-  fill.style.width=p+"%";
-  msg.innerHTML="Downloading... "+p+"%";
+    let progress = 0;
 
-  if(p>=100){
-    clearInterval(t);
-    msg.innerHTML="✅ Download Completed! Check Downloads Folder / Server Storage";
-  }
-},500);
+    let interval = setInterval(async () => {
+
+        let res = await fetch("/progress");
+        let data = await res.json();
+
+        progress = data.value;
+        bar.style.width = progress + "%";
+        status.innerText = "Downloading... " + progress + "%";
+
+        if(progress >= 100) {
+            clearInterval(interval);
+
+            spinner.style.display = "none";
+            success.style.display = "block";
+            status.innerText = "Done";
+
+            // REAL DOWNLOAD LINK SHOW
+            downloadLink.style.display = "block";
+        }
+
+    }, 500);
 }
 </script>
 
