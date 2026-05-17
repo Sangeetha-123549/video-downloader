@@ -24,24 +24,28 @@ async function downloadVideo() {
 
     document.getElementById("status").innerText = "Downloading...";
 
-    let response = await fetch("/download", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ url: url })
-    });
+    try {
+        let response = await fetch("/download", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ url: url })
+        });
 
-    let data = await response.json();
+        let data = await response.json();
 
-    if(data.status === "success"){
+        // 🔥 IMPORTANT FIX: clear old input
+        document.getElementById("url").value = "";
+
         document.getElementById("status").innerText = "Download completed";
 
+        // 🔥 prevent cache issue
         setTimeout(() => {
             window.location.href = "/file?cache=" + new Date().getTime();
         }, 2000);
 
-    } else {
+    } catch(error) {
         document.getElementById("status").innerText = "Download failed";
     }
 }
