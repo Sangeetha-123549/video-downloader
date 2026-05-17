@@ -20,7 +20,7 @@ def download():
     url = data.get("url")
 
     if not url:
-        return jsonify({"error": "No URL provided"}), 400
+        return jsonify({"error": "No URL"}), 400
 
     filename = f"video_{int(time.time())}.mp4"
 
@@ -33,7 +33,7 @@ def download():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
 
-        return jsonify({"status": "success", "file": filename})
+        return jsonify({"status": "ok"})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -43,11 +43,11 @@ def download():
 def file():
     files = sorted(os.listdir(DOWNLOAD_FOLDER), reverse=True)
 
-    if len(files) == 0:
+    if not files:
         return "Video not found", 404
 
-    latest_file = files[0]
-    return send_file(os.path.join(DOWNLOAD_FOLDER, latest_file), as_attachment=True)
+    latest = files[0]
+    return send_file(os.path.join(DOWNLOAD_FOLDER, latest), as_attachment=True)
 
 
 if __name__ == "__main__":
