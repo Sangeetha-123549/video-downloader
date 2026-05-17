@@ -1,159 +1,50 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Video Downloader</title>
-
-<style>
-
-body{
-    margin:0;
-    padding:0;
-    font-family:Arial,sans-serif;
-    background:linear-gradient(135deg,#0f172a,#1e293b);
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    color:white;
-}
-
-.container{
-    width:90%;
-    max-width:400px;
-    background:#111827;
-    padding:25px;
-    border-radius:20px;
-    text-align:center;
-    box-shadow:0 0 25px rgba(0,0,0,0.5);
-}
-
-h1{
-    margin-bottom:20px;
-}
-
-input{
-    width:100%;
-    padding:12px;
-    border:none;
-    border-radius:10px;
-    margin-bottom:15px;
-    outline:none;
-}
-
-button{
-    width:100%;
-    padding:12px;
-    border:none;
-    border-radius:10px;
-    background:#22c55e;
-    color:white;
-    font-size:16px;
-    cursor:pointer;
-}
-
-button:hover{
-    background:#16a34a;
-}
-
-#status{
-    margin-top:15px;
-    font-size:14px;
-}
-
-.spinner{
-    margin:15px auto;
-    width:35px;
-    height:35px;
-    border:4px solid #333;
-    border-top:4px solid #22c55e;
-    border-radius:50%;
-    animation:spin 1s linear infinite;
-    display:none;
-}
-
-@keyframes spin{
-    100%{
-        transform:rotate(360deg);
-    }
-}
-
-</style>
+    <title>Video Downloader</title>
 </head>
-
 <body>
 
-<div class="container">
+<h2>YouTube Downloader</h2>
 
-    <h1>🎬 Video Downloader</h1>
+<input type="text" id="url" placeholder="Paste YouTube link">
+<button onclick="downloadVideo()">Download</button>
 
-    <input
-        type="text"
-        id="url"
-        placeholder="Paste YouTube URL">
-
-    <button onclick="downloadVideo()">
-        Download
-    </button>
-
-    <div class="spinner" id="spinner"></div>
-
-    <div id="status">
-        Ready
-    </div>
-
-</div>
+<p id="status"></p>
 
 <script>
+async function downloadVideo() {
 
-async function downloadVideo(){
+    let url = document.getElementById("url").value;
 
-    let url=document.getElementById("url").value;
-
-    let spinner=document.getElementById("spinner");
-    let status=document.getElementById("status");
-
-    if(url===""){
+    if(url === ""){
         alert("Paste YouTube URL");
         return;
     }
 
-    spinner.style.display="block";
-    status.innerText="Downloading video... Please wait";
+    document.getElementById("status").innerText = "Downloading...";
 
-    try{
+    let response = await fetch("/download", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ url: url })
+    });
 
-        let response = await fetch("/download",{
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify({
-                url:url
-            })
-        });
+    let data = await response.json();
 
-        let data = await response.json();
-
-        status.innerText="✅ Download completed";
+    if(data.status === "success"){
+        document.getElementById("status").innerText = "Download completed";
 
         setTimeout(() => {
-            window.location.href="/file";
-        }, 5000);
+            window.location.href = "/file?cache=" + new Date().getTime();
+        }, 2000);
 
+    } else {
+        document.getElementById("status").innerText = "Download failed";
     }
-
-    catch(error){
-
-        status.innerText="❌ Download failed";
-
-    }
-
-    spinner.style.display="none";
-
 }
-
 </script>
 
 </body>
