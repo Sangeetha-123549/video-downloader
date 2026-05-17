@@ -35,17 +35,15 @@ async function downloadVideo() {
 
         let data = await response.json();
 
-        // 🔥 IMPORTANT FIX: clear old input
         document.getElementById("url").value = "";
 
         document.getElementById("status").innerText = "Download completed";
 
-        // 🔥 prevent cache issue
         setTimeout(() => {
             window.location.href = "/file?cache=" + new Date().getTime();
         }, 2000);
 
-    } catch(error) {
+    } catch (error) {
         document.getElementById("status").innerText = "Download failed";
     }
 }
