@@ -1,12 +1,12 @@
-from flask import Flask, request, jsonify, render_template, send_file
+from flask import Flask, render_template, request, send_file, jsonify
 import yt_dlp
 import os
-import glob
+import time
 
 app = Flask(__name__)
 
-DOWNLOAD_DIR = "downloads"
-os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+DOWNLOAD_FOLDER = "downloads"
+os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
 
 @app.route("/")
@@ -16,53 +16,39 @@ def home():
 
 @app.route("/download", methods=["POST"])
 def download():
+    data = request.get_json()
+    url = data.get("url")
+
+    if not url:
+        return jsonify({"error": "No URL provided"}), 400
+
+    filename = f"video_{int(time.time())}.mp4"
+
+    ydl_opts = {
+        'outtmpl': f'{DOWNLOAD_FOLDER}/{filename}',
+        'format': 'best'
+    }
 
     try:
-
-        data = request.get_json()
-
-        url = data["url"]
-
-        ydl_opts = {
-            "format": "best",
-            "outtmpl": f"{DOWNLOAD_DIR}/video.%(ext)s",
-            "noplaylist": True
-        }
-
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
 
-        return jsonify({
-            "status": "success"
-        })
+        return jsonify({"status": "success", "file": filename})
 
     except Exception as e:
-
-        return jsonify({
-            "status": "error",
-            "message": str(e)
-        })
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/file")
 def file():
+    files = sorted(os.listdir(DOWNLOAD_FOLDER), reverse=True)
 
-    files = glob.glob(f"{DOWNLOAD_DIR}/video.*")
+    if len(files) == 0:
+        return "Video not found", 404
 
-    if not files:
-        return "Video not found"
-
-    return send_file(
-        files[0],
-        as_attachment=True,
-        download_name="video.mp4",
-        mimetype="video/mp4"
-    )
+    latest_file = files[0]
+    return send_file(os.path.join(DOWNLOAD_FOLDER, latest_file), as_attachment=True)
 
 
 if __name__ == "__main__":
-
-    app.run(
-        host="0.0.0.0",
-        port=10000
-    )
+    app.run(host="0.0.0.0", port=10000)
